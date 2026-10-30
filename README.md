@@ -9,9 +9,13 @@ Incluye inicio de sesión con usuarios y administrador en SQL, ajuste del modelo
 Requiere Node.js >=22.13.0 y Git. Desde la carpeta del proyecto:
 
 ```sh
-npm ci
+npm run install:ci
 npm run build
 ```
+
+Si ya tienes el servidor abierto, detenlo con **Ctrl+C** en la terminal donde ejecutaste `npm run dev` o `npm start` **antes de reinstalar dependencias**. En Windows, el servidor puede mantener bloqueado `lightningcss.win32-x64-msvc.node`, lo que produce el error `EPERM unlink`. Una instalación interrumpida puede dejar también el error `ERR_MODULE_NOT_FOUND` de Vinext: detén el servidor y repite `npm run install:ci`; compila solamente cuando termine correctamente. No hace falta borrar la base de datos ni ejecutar la terminal como administrador para liberar ese archivo.
+
+Para volver a trabajar en una instalación existente, normalmente basta con `npm run dev`. Reinstala las dependencias cuando cambie `package-lock.json` o cuando necesites reparar una instalación incompleta.
 
 Para preparar una **base local vacía**, ejecuta cada migración en orden:
 
