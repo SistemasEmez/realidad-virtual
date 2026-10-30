@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:workers';
-import { getChatGPTUser } from '../../chatgpt-auth';
+import {getPanelUser} from '../../../lib/panel-auth';
 export async function POST(request:Request){
- const user=await getChatGPTUser();if(!user)return new Response(null,{status:401});
+ const user=await getPanelUser();if(!user)return new Response(null,{status:401});
  if(request.headers.get('origin')!==new URL(request.url).origin)return new Response(null,{status:403});
  const form=await request.formData();const file=form.get('file');
  if(!(file instanceof File)||file.size>25*1024*1024||!file.size)return Response.json({error:'Sube un archivo de hasta 25 MB'},{status:400});

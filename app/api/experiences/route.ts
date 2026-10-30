@@ -1,15 +1,15 @@
-import { getChatGPTUser } from '../../chatgpt-auth';
+import {getPanelUser} from '../../../lib/panel-auth';
 import { getDb } from '../../../db';
 import { experiences } from '../../../db/schema';
 import { and, eq } from 'drizzle-orm';
 export async function GET() {
- const user = await getChatGPTUser();
+ const user = await getPanelUser();
  if (!user) return Response.json({error:'Inicia sesión'}, {status:401});
  const rows = await getDb().select().from(experiences).where(eq(experiences.owner,user.userId));
  return Response.json(rows.map(r=>({...JSON.parse(r.config),id:r.id,updated:r.updated})));
 }
 export async function POST(request:Request) {
- const user = await getChatGPTUser();
+ const user = await getPanelUser();
  if (!user) return Response.json({error:'Inicia sesión'}, {status:401});
  if (request.headers.get('origin') !== new URL(request.url).origin) return Response.json({error:'Origen inválido'},{status:403});
  const c = await request.json() as Record<string,unknown>;
@@ -29,7 +29,7 @@ export async function POST(request:Request) {
  return Response.json({ok:true,updated});
 }
 export async function DELETE(request:Request) {
- const user=await getChatGPTUser(); if(!user)return new Response(null,{status:401});
+ const user=await getPanelUser(); if(!user)return new Response(null,{status:401});
  if(request.headers.get('origin')!==new URL(request.url).origin)return new Response(null,{status:403});
  const id=new URL(request.url).searchParams.get('id')||'';
  await getDb().delete(experiences).where(and(eq(experiences.id,id),eq(experiences.owner,user.userId)));

@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+const nodes=new Map(),events=new Map(),messages=[];let starts=0,stops=0,tracksStopped=0;
+function element(tag='div'){return {tag,hidden:true,textContent:'',dataset:{},attributes:{},children:[],listeners:new Map(),setAttribute(k,v){this.attributes[k]=v},addEventListener(k,v){this.listeners.set(k,v)},append(...children){this.children.push(...children)},systems:{'mindar-image-system':{async start(){starts++},stop(){stops++}}}}}
+const body=element('body');const track={stop(){tracksStopped++},getCapabilities(){return {}}};
+const video={...element('video'),srcObject:{getTracks:()=>[track],getVideoTracks:()=>[track]}};
+const parent={postMessage(m){messages.push(m)}},origin='http://localhost:5173';const aframe={components:{'mindar-image':{}}};
+const context=vm.createContext({document:{body,getElementById(id){if(!nodes.has(id))nodes.set(id,element());return nodes.get(id)},createElement:element,querySelector:()=>video,querySelectorAll:()=>[video]},window:{isSecureContext:true,AFRAME:aframe,addEventListener(k,v){events.set(k,v)}},AFRAME:aframe,navigator:{mediaDevices:{getUserMedia(){throw Error('Tests must never request a camera')}}},MutationObserver:class{constructor(callback){this.callback=callback}observe(){}disconnect(){}},setTimeout(){return 1},clearTimeout(){},location:{origin},parent});
+vm.runInContext(await readFile(new URL('../public/scanner.js',import.meta.url),'utf8'),context);
+await events.get('message')({origin:'https://example.com',source:parent,data:{type:'start',config:{}}});assert.equal(body.children.length,0);
+await events.get('message')({origin,source:parent,data:{type:'start',config:{name:'Escáner de prueba',target:'/target.mind',model:'/model.glb',brandLogo:'',scale:2,rx:10,ry:20,rz:0,x:0,y:1,z:0,targetIndex:0,spin:true}}});
+assert.equal(body.children.length,1);const scene=body.children[0];assert.equal(starts,0,'Wait for the renderer before requesting camera');scene.listeners.get('renderstart')();assert.equal(starts,0,'Only a direct activation click requests camera');assert.equal(nodes.get('activate-camera').disabled,false);nodes.get('activate-camera').listeners.get('click')();assert.equal(starts,1);assert.match(scene.attributes.renderer,/alpha: true/);assert.equal(video.muted,true);assert.equal(video.attributes.playsinline,'');
+scene.listeners.get('arReady')();assert.equal(body.dataset.state,'scanning');
+const anchor=scene.children[1],model=anchor.children[0];assert.equal(model.attributes.scale,'2 2 2');assert.equal(model.attributes.position,'0 1 0');assert.equal(model.attributes.src,'/model.glb');
+model.listeners.get('model-loaded')();anchor.listeners.get('targetFound')();assert.equal(body.dataset.state,'found');assert.equal(nodes.get('status-title').textContent,'Tu imagen cobró vida');
+anchor.listeners.get('targetLost')();assert.equal(body.dataset.state,'scanning');
+nodes.get('help').listeners.get('click')();assert.equal(nodes.get('help-panel').hidden,false);nodes.get('dismiss-help').listeners.get('click')();assert.equal(nodes.get('help-panel').hidden,true);
+scene.listeners.get('arError')();assert.equal(body.dataset.state,'error');assert.equal(nodes.get('scanner-error').hidden,false);
+nodes.get('close').listeners.get('click')();assert.equal(stops,1);assert.equal(tracksStopped,1);assert.ok(messages.some(m=>m.type==='close-ar'));
+console.log('PASS: scanner initialization, image detection/loss, saved transformations, help, errors, origin checks and camera cleanup.');

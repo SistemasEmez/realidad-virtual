@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./design.css";
+import "./sharing.css";
+import "./panel-tools.css";
 
 export const metadata: Metadata = {
   title: "Órbita · AR Studio",

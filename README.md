@@ -1,4 +1,45 @@
-# vinext-starter
+# Órbita · AR Studio
+
+Panel para gestionar experiencias de realidad aumentada con modelos GLB/GLTF, targets de MindAR y enlaces de acceso por experiencia.
+
+Incluye inicio de sesión con usuarios y administrador en SQL, ajuste del modelo 3D, logos por experiencia, acceso opcional con contraseña para visitantes y un compilador MindAR integrado con escalas y puntos de referencia reales.
+
+## Ejecutar el proyecto
+
+Requiere Node.js >=22.13.0 y Git. Desde la carpeta del proyecto:
+
+```sh
+npm ci
+npm run build
+```
+
+Para preparar una **base local vacía**, ejecuta cada migración en orden:
+
+```sh
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_odd_deadpool.sql
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_wild_lady_vermin.sql
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0002_heavy_siren.sql
+npm run dev
+```
+
+Abre la dirección local que indique la terminal. No vuelvas a ejecutar migraciones ya aplicadas. El esquema completo y las instrucciones de usuarios están en [database/README.txt](database/README.txt). No se incluye una contraseña administrativa predeterminada; crea el primer administrador desde la pantalla de configuración del panel.
+
+El repositorio contiene el código, las migraciones y los recursos iniciales. Las bases locales, sesiones, contraseñas, archivos subidos por usuarios, dependencias y compilaciones quedan fuera de Git. En un equipo nuevo tendrás que crear tu cuenta e importar tus modelos y targets.
+
+## Targets y validación
+
+En **Generar target**, selecciona tus imágenes o prueba el ejemplo integrado. Después de compilar puedes explorar cada imagen y escala, ver sus puntos de reconocimiento o seguimiento y aplicar el archivo `.mind` a la experiencia. Guarda la experiencia para conservar el cambio.
+
+```sh
+node node_modules/typescript/bin/tsc --noEmit
+node scripts/verify-target-inspector.mjs
+```
+
+Subir el código a GitHub no publica el sitio. El servidor requiere los bindings D1 (`DB`) y R2 (`BUCKET`); no es un sitio estático para GitHub Pages. A continuación se conserva la documentación técnica de la base Vinext/Sites utilizada por el proyecto.
+
+---
+
+## Base vinext-starter
 
 A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
 

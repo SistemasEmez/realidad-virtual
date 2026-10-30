@@ -8,6 +8,20 @@
       "when": 1793319729282,
       "tag": "0000_odd_deadpool",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793389248692,
+      "tag": "0001_wild_lady_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793397411740,
+      "tag": "0002_heavy_siren",
+      "breakpoints": true
     }
   ]
 }

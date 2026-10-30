@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {levelsFor,grayPixels} from '../public/target-inspector.js';
+const full={width:2,height:2,scale:1,data:new Uint8Array([0,63,128,255])};
+const small={width:1,height:1,scale:.5,data:new Uint8Array([117])};
+const maxima={x:.25,y:1,scale:2,angle:.7},minima={x:1.2,y:.2,scale:1,angle:0};
+const tracking={x:.4,y:.6};
+const target={imageList:[full,small],matchingData:[{maximaPoints:[maxima],minimaPoints:[minima]},{maximaPoints:[],minimaPoints:[]}],trackingImageList:[small],trackingData:[{points:[tracking]}]};
+const matching=levelsFor(target);
+assert.equal(matching.length,2);assert.equal(matching[0].image,full);assert.equal(matching[1].image,small);
+assert.deepEqual(matching[0].points,[maxima,minima],'Use both actual feature sets without changing their coordinates or sizes');
+assert.equal(matching[1].scale,.5);assert.equal(matching[1].points.length,0,'Do not invent points for empty scales');
+const tracked=levelsFor(target,'tracking');assert.equal(tracked.length,1);assert.equal(tracked[0].image,small);assert.deepEqual(tracked[0].points,[tracking]);
+assert.deepEqual(Array.from(grayPixels(full)),[0,0,0,255,63,63,63,255,128,128,128,255,255,255,255,255],'Grayscale pixel positions and opacity remain exact');
+assert.deepEqual(levelsFor({imageList:[small]}).map(l=>l.points),[[]]);
+console.log('PASS: actual MindAR scales, recognition/tracking coordinates, empty scales and exact grayscale pixels.');
